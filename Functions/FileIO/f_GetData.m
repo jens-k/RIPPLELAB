@@ -228,19 +228,42 @@ try
             if isempty(s_End) 
                 s_Start	= 0;
             end
-
-            if isempty(s_End)  
-                s_End	= 'e';
-            end
-
-            st_Data.m_Data	= abfload(pst_Info.str_SigPath,...
-                            'channels',str_LabSelected,...
-                            'start',s_Start,...
-                            'stop',s_End);
-
-            if find(size(st_Data.m_Data) == numel(pv_Selected)) == 1
-                st_Data.m_Data	= st_Data.m_Data';
-            end
+			
+			if isempty(s_End)
+				s_End	= 'e';
+			end
+			
+			st_Data.m_Data	= abfload(pst_Info.str_SigPath,...
+				'channels',str_LabSelected,...
+				'start',s_Start,...
+				'stop',s_End);
+			
+			if find(size(st_Data.m_Data) == numel(pv_Selected)) == 1
+				st_Data.m_Data	= st_Data.m_Data';
+			end
+			
+		case 'ft'
+			
+			[s_Start,s_End]	= f_AskSamplesLims(st_Data.s_Sampling,...
+				pst_Info.s_Time,pv_TimeLims);
+			str_LabSelected   = st_Data.v_Labels(:)';
+			
+			if isempty(s_End)
+				s_Start	= floor(st_Data.v_TimeLims(1) * st_Data.s_Sampling * 60);
+				s_End	= floor(st_Data.v_TimeLims(2) * st_Data.s_Sampling * 60);
+			end
+			
+			% Load data
+			temp					= load(pst_Info.str_SigPath, '-mat');
+			names					= fieldnames(temp);
+			if length(names) ~= 1
+				error('Unexpected content in preprocessed data file. File should contain one single structure.')
+			end
+			st_Data.m_Data	= ft_fetch_data(temp.(names{1}))';
+			
+			if find(size(st_Data.m_Data) == numel(pv_Selected)) == 1
+				st_Data.m_Data	= st_Data.m_Data';
+			end
 
 %         case 'new'  % Read new format file >>>>>>>>>>> [**INSERT!**] <<<<<<<<< 
 % 

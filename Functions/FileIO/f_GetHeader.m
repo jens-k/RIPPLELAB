@@ -217,7 +217,31 @@ try
             st_Info.v_Labels        = st_Hdr.recChNames;
             st_Info.s_Scale         = 1;
             st_Info.st_Custom       = st_Hdr;
-            
+     
+		case 'ft'
+			% file should contain a fieldtrip structure as the only
+			% variable
+			temp					= load(str_FullPath, '-mat');
+			names					= fieldnames(temp);
+			if length(names) ~= 1
+				error('Unexpected content in preprocessed data file. File should contain one single structure.')
+			end
+			temp_hdr				= ft_fetch_header(temp.(names{1}));
+
+			st_Info.str_SigPath     = str_FullPath;
+            st_Info.str_FileName    = pst_SigPath.name;
+            st_Info.str_SigExt      = str_FileExt;
+			st_Info.s_Start         = [0 0 0]; % not part of ft structure
+            st_Info.s_Time          = temp_hdr.nSamples./(60*temp_hdr.Fs); % in min
+            st_Info.s_Samples       = temp_hdr.nSamples;
+            st_Info.v_SampleRate    = temp_hdr.Fs;
+            st_Info.s_NumbRec       = numel(temp_hdr.label);
+            st_Info.v_Labels        = temp_hdr.label;
+            st_Info.s_Scale         = 1;
+			st_Info.st_Custom       = temp.(names{1}).cfg;
+			st_Info.st_Custom.events = ft_fetch_event(temp.(names{1}));
+			clear temp
+			
 %         case 'new' % Read new format file >>>>>>>>>>> [**INSERT!**] <<<<<<<<< 
 %             
 %             st_Info	= newformatreadheader(str_FullPath);
